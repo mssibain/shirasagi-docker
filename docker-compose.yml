@@ -1,0 +1,63 @@
+version: '3.7'
+services:
+  # https-portal:
+  #   image: steveltn/https-portal:1
+  #   container_name: shirasagi_https-portal
+  #   ports:
+  #     - '80:80'
+  #     - '443:443'
+  #   environment:
+  #     DOMAINS: >-
+  #       your.domain -> http://nginx
+  #     # STAGE: 'production' # Don't use production until staging works
+  #     WORKER_PROCESSES: auto
+  #     WORKER_CONNECTIONS: 2048
+  #     CLIENT_MAX_BODY_SIZE: '128M'
+  #   links:
+  #     - nginx
+  #   volumes:
+  #     - ./certs:/var/lib/https-portal
+  #   restart: always
+  nginx:
+    #image: owasp/modsecurity-crs:v3.3.2-nginx
+    image: nginx:1.23.0
+    container_name: shirasagi_nginx
+    volumes:
+      - ./nginx/conf.d/shirasagi.conf:/etc/nginx/conf.d/shirasagi.conf
+      - ./nginx/log:/var/log/nginx
+      - ./nginx/www:/var/www
+    links:
+      - shirasagi
+    ports:
+      - 80:80
+    restart: always
+  shirasagi:
+    build: ./shirasagi_image
+    container_name: shirasagi_shirasagi
+    volumes:
+      - ./shirasagi_image/run.sh:/run.sh
+      - ./shirasagi:/var/www/shirasagi
+      - bundle:/var/www/shirasagi/vendor/bundle
+    command: bash /run.sh
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+    tty: true
+    stdin_open: true
+    restart: always
+  mongodb:
+    image: mongo:4.4.14
+    container_name: shirasagi_db
+    command: --wiredTigerCacheSizeGB=1
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - dbdata:/data/db
+    restart: always
+volumes:
+  bundle:
+    driver: local
+  dbdata:
+    driver: local
