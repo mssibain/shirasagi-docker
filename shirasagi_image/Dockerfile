@@ -1,4 +1,4 @@
-FROM ruby:2.7.6-slim-buster
+FROM ruby:3.0.4-slim-buster
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get -y install \
