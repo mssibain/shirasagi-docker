@@ -70,3 +70,7 @@ After confirming that the URL is accessible, register an administrative user.
 
 3:
 `$ rake ss:create_user data='{ name: "システム管理者", email: "sys@example.jp", password: "pass" }'`
+
+## Notes
+
+*The Nginx port number specified in docker-compose.yml must be consistent across hosts and containers.
